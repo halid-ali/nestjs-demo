@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { Guid } from "guid-typescript";
 import { ProductModel } from "./product.model";
 
 @Injectable()
@@ -6,14 +7,34 @@ export class ProductsService {
     private products: ProductModel[];
 
     constructor() {
-        this.products = [
-            new ProductModel("p1", "Product 01", "P1 Description", 3.45),
-            new ProductModel("p2", "Product 02", "P2 Description", 5.75),
-            new ProductModel("p3", "Product 03", "P3 Description", 1.90)
-        ];
+        this.products = this.createInitialProducts();
     }
 
     getProducts(): ProductModel[] {
         return this.products;
+    }
+
+    private createProductId(): string {
+        return Guid.create().toString();
+    }
+
+    private createInitialProducts(): ProductModel[] {
+        return [
+            new ProductModel(
+                this.createProductId(),
+                "Apple",
+                "Fruit",
+                1.45),
+            new ProductModel(
+                this.createProductId(),
+                "BMW",
+                "Auto",
+                125.75),
+            new ProductModel(
+                this.createProductId(),
+                "Chair",
+                "Furniture",
+                17.90)
+        ];
     }
 }
