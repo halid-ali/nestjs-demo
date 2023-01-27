@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { Guid } from "guid-typescript";
 import { ProductModel } from "./product.model";
 
@@ -13,6 +13,20 @@ export class ProductsService {
     getProducts(): ProductModel[] {
         //instead of pointer/reference of the products, return copy of the products
         return [...this.products];
+    }
+
+    getProduct(id: string) {
+        const product = this.findProduct(id)[0];
+        //instead of pointer/reference of the product, return copy of the product
+        return { ...product };
+    }
+
+    private findProduct(id: string): [ProductModel, number] {
+        const productIndex = this.products.findIndex((p) => p.id == id);
+        if (productIndex < 0) throw new NotFoundException('Product could not be found!');
+
+        const product = this.products[productIndex];
+        return [product, productIndex];
     }
 
     private createProductId(): string {
