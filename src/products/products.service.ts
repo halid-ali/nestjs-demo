@@ -21,6 +21,15 @@ export class ProductsService {
         return { ...product };
     }
 
+    addProduct(title: string, description: string, price: number): string {
+        const id = this.createProductId();
+        const newProduct = new ProductModel(id, title, description, price);
+
+        this.products.push(newProduct);
+
+        return id;
+    }
+
     private findProduct(id: string): [ProductModel, number] {
         const productIndex = this.products.findIndex((p) => p.id == id);
         if (productIndex < 0) throw new NotFoundException('Product could not be found!');
