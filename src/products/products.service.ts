@@ -5,19 +5,26 @@ import { ProductModel } from "./product.model";
 
 @Injectable()
 export class ProductsService {
-    private products: ProductModel[];
-
     constructor(@InjectModel('Product') private readonly productModel: Model<ProductModel>) { }
 
-    getProducts(): ProductModel[] {
-        //instead of pointer/reference of the products, return copy of the products
-        return [...this.products];
+    async getProducts() {
+        const products = await this.productModel.find().exec();
+        return products.map(product => ({
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            price: product.price
+        }));
     }
 
-    getProduct(id: string) {
-        const product = this.findProduct(id)[0];
-        //instead of pointer/reference of the product, return copy of the product
-        return { ...product };
+    async getProduct(id: string) {
+        const product = await this.findProduct(id);
+        return {
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            price: product.price
+        }
     }
 
     async addProduct(title: string, description: string, price: number) {
@@ -28,30 +35,43 @@ export class ProductsService {
         });
 
         const result = await newProduct.save();
-        return result.id;
+        return result.id as string;
     }
 
-    updateProduct(id: string, title: string, description: string, price: number) {
-        const [product, index] = this.findProduct(id);
-        const updatedProduct = { ...product }; //get copy of the product
+    async updateProduct(id: string, title: string, description: string, price: number) {
+        const productToUpdate = await this.findProduct(id);
 
-        if (title) updatedProduct.title = title;
-        if (description) updatedProduct.description = description;
-        if (price) updatedProduct.price = price;
+        if (!productToUpdate) return 'Product cannot be found.';
 
-        this.products[index] = updatedProduct;
+        if (title) productToUpdate.title = title;
+        if (description) productToUpdate.description = description;
+        if (price) productToUpdate.price = price;
+
+        const result = await this.productModel.updateOne({ _id: id }, {
+            title: productToUpdate.title,
+            description: productToUpdate.description,
+            price: productToUpdate.price
+        });
+
+        return result.acknowledged ? 'Product updated.' : 'Product update failed.';
     }
 
-    deleteProduct(id: string) {
-        const index = this.findProduct(id)[1];
-        this.products.splice(index, 1);
+    async deleteProduct(id: string) {
+        const result = await this.productModel.deleteOne({ _id: id }).exec();
+        return result.acknowledged ? 'Product deleted.' : 'Product delete failed.';
     }
 
-    private findProduct(id: string): [ProductModel, number] {
-        const productIndex = this.products.findIndex((p) => p.id == id);
-        if (productIndex < 0) throw new NotFoundException('Product could not be found!');
+    private async findProduct(id: string): Promise<ProductModel> {
+        try {
+            const product = await this.productModel.findById(id).exec();
 
-        const product = this.products[productIndex];
-        return [product, productIndex];
+            if (!product) {
+                throw new NotFoundException('Product cannot be found.')
+            }
+
+            return product;
+        } catch (error) {
+            throw new NotFoundException('Found error: ', error);
+        }
     }
 }
