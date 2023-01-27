@@ -11,7 +11,8 @@ export class ProductsService {
     }
 
     getProducts(): ProductModel[] {
-        return this.products;
+        //instead of pointer/reference of the products, return copy of the products
+        return [...this.products];
     }
 
     private createProductId(): string {
