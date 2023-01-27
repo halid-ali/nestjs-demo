@@ -1,14 +1,14 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose/dist";
 import { Guid } from "guid-typescript";
+import { Model } from "mongoose";
 import { ProductModel } from "./product.model";
 
 @Injectable()
 export class ProductsService {
     private products: ProductModel[];
 
-    constructor() {
-        this.products = this.createInitialProducts();
-    }
+    constructor(@InjectModel('Product') private readonly productModel: Model<ProductModel>) { }
 
     getProducts(): ProductModel[] {
         //instead of pointer/reference of the products, return copy of the products
@@ -21,13 +21,15 @@ export class ProductsService {
         return { ...product };
     }
 
-    addProduct(title: string, description: string, price: number): string {
-        const id = this.createProductId();
-        const newProduct = new ProductModel(id, title, description, price);
+    async addProduct(title: string, description: string, price: number) {
+        const newProduct = new this.productModel({
+            title: title,
+            description: description,
+            price: price
+        });
 
-        this.products.push(newProduct);
-
-        return id;
+        const result = await newProduct.save();
+        return result.id;
     }
 
     updateProduct(id: string, title: string, description: string, price: number) {
@@ -52,29 +54,5 @@ export class ProductsService {
 
         const product = this.products[productIndex];
         return [product, productIndex];
-    }
-
-    private createProductId(): string {
-        return Guid.create().toString();
-    }
-
-    private createInitialProducts(): ProductModel[] {
-        return [
-            new ProductModel(
-                this.createProductId(),
-                "Apple",
-                "Fruit",
-                1.45),
-            new ProductModel(
-                this.createProductId(),
-                "BMW",
-                "Auto",
-                125.75),
-            new ProductModel(
-                this.createProductId(),
-                "Chair",
-                "Furniture",
-                17.90)
-        ];
     }
 }
