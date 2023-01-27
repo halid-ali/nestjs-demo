@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose/dist";
-import { Guid } from "guid-typescript";
 import { Model } from "mongoose";
 import { ProductModel } from "./product.model";
 
