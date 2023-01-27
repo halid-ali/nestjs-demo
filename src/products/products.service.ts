@@ -30,6 +30,17 @@ export class ProductsService {
         return id;
     }
 
+    updateProduct(id: string, title: string, description: string, price: number) {
+        const [product, index] = this.findProduct(id);
+        const updatedProduct = { ...product }; //get copy of the product
+
+        if (title) updatedProduct.title = title;
+        if (description) updatedProduct.description = description;
+        if (price) updatedProduct.price = price;
+
+        this.products[index] = updatedProduct;
+    }
+
     private findProduct(id: string): [ProductModel, number] {
         const productIndex = this.products.findIndex((p) => p.id == id);
         if (productIndex < 0) throw new NotFoundException('Product could not be found!');
