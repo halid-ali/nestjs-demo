@@ -1,80 +1,77 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { Guid } from "guid-typescript";
+import { InjectModel } from "@nestjs/mongoose/dist";
+import { Model } from "mongoose";
 import { ProductModel } from "./product.model";
 
 @Injectable()
 export class ProductsService {
-    private products: ProductModel[];
+    constructor(@InjectModel('Product') private readonly productModel: Model<ProductModel>) { }
 
-    constructor() {
-        this.products = this.createInitialProducts();
+    async getProducts() {
+        const products = await this.productModel.find().exec();
+        return products.map(product => ({
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            price: product.price
+        }));
     }
 
-    getProducts(): ProductModel[] {
-        //instead of pointer/reference of the products, return copy of the products
-        return [...this.products];
+    async getProduct(id: string) {
+        const product = await this.findProduct(id);
+        return {
+            id: product.id,
+            title: product.title,
+            description: product.description,
+            price: product.price
+        }
     }
 
-    getProduct(id: string) {
-        const product = this.findProduct(id)[0];
-        //instead of pointer/reference of the product, return copy of the product
-        return { ...product };
+    async addProduct(title: string, description: string, price: number) {
+        const newProduct = new this.productModel({
+            title: title,
+            description: description,
+            price: price
+        });
+
+        const result = await newProduct.save();
+        return result.id as string;
     }
 
-    addProduct(title: string, description: string, price: number): string {
-        const id = this.createProductId();
-        const newProduct = new ProductModel(id, title, description, price);
+    async updateProduct(id: string, title: string, description: string, price: number) {
+        const productToUpdate = await this.findProduct(id);
 
-        this.products.push(newProduct);
+        if (!productToUpdate) return 'Product cannot be found.';
 
-        return id;
+        if (title) productToUpdate.title = title;
+        if (description) productToUpdate.description = description;
+        if (price) productToUpdate.price = price;
+
+        const result = await this.productModel.updateOne({ _id: id }, {
+            title: productToUpdate.title,
+            description: productToUpdate.description,
+            price: productToUpdate.price
+        });
+
+        return result.acknowledged ? 'Product updated.' : 'Product update failed.';
     }
 
-    updateProduct(id: string, title: string, description: string, price: number) {
-        const [product, index] = this.findProduct(id);
-        const updatedProduct = { ...product }; //get copy of the product
-
-        if (title) updatedProduct.title = title;
-        if (description) updatedProduct.description = description;
-        if (price) updatedProduct.price = price;
-
-        this.products[index] = updatedProduct;
+    async deleteProduct(id: string) {
+        const result = await this.productModel.deleteOne({ _id: id }).exec();
+        return result.acknowledged ? 'Product deleted.' : 'Product delete failed.';
     }
 
-    deleteProduct(id: string) {
-        const index = this.findProduct(id)[1];
-        this.products.splice(index, 1);
-    }
+    private async findProduct(id: string): Promise<ProductModel> {
+        try {
+            const product = await this.productModel.findById(id).exec();
 
-    private findProduct(id: string): [ProductModel, number] {
-        const productIndex = this.products.findIndex((p) => p.id == id);
-        if (productIndex < 0) throw new NotFoundException('Product could not be found!');
+            if (!product) {
+                throw new NotFoundException('Product cannot be found.')
+            }
 
-        const product = this.products[productIndex];
-        return [product, productIndex];
-    }
-
-    private createProductId(): string {
-        return Guid.create().toString();
-    }
-
-    private createInitialProducts(): ProductModel[] {
-        return [
-            new ProductModel(
-                this.createProductId(),
-                "Apple",
-                "Fruit",
-                1.45),
-            new ProductModel(
-                this.createProductId(),
-                "BMW",
-                "Auto",
-                125.75),
-            new ProductModel(
-                this.createProductId(),
-                "Chair",
-                "Furniture",
-                17.90)
-        ];
+            return product;
+        } catch (error) {
+            throw new NotFoundException('Found error: ', error);
+        }
     }
 }

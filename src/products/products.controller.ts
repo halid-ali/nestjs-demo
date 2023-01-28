@@ -8,37 +8,41 @@ export class ProductsController {
 
     @Get()
     @Header("content-type", "application/json")
-    getProducts(): ProductModel[] {
-        return this.productsService.getProducts();
+    async getProducts() {
+        const products = await this.productsService.getProducts();
+        return {
+            'Product Count': products.length,
+            'Products': products
+        };
     }
 
     @Get(':id')
-    getProduct(@Param('id') id: string) {
-        return this.productsService.getProduct(id);
+    async getProduct(@Param('id') id: string) {
+        return await this.productsService.getProduct(id);
     }
 
     @Post()
-    addProduct(
+    async addProduct(
         @Body('title') title: string,
         @Body('description') description: string,
         @Body('price') price: number
-    ): any {
-        const productId = this.productsService.addProduct(title, description, price);
+    ) {
+        const productId = await this.productsService.addProduct(title, description, price);
         return { id: productId };
     }
 
     @Patch(':id')
-    updateProduct(
+    async updateProduct(
         @Param('id') id: string,
         @Body('title') title: string,
         @Body('description') description: string,
         @Body('price') price: number
     ) {
-        this.productsService.updateProduct(id, title, description, price);
+        return await this.productsService.updateProduct(id, title, description, price);
     }
 
     @Delete(':id')
-    deleteProduct(@Param('id') id: string) {
-        this.productsService.deleteProduct(id);
+    async deleteProduct(@Param('id') id: string) {
+        return await this.productsService.deleteProduct(id);
     }
 }
