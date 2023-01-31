@@ -4,5 +4,5 @@ export class DbSettings {
     static readonly Port = 3306;
     static readonly DatabaseName = 'nestjs-db';
     static readonly Username = 'root';
-    static readonly Password = 'root';
+    static readonly Password = 'the3.14Mysql';
 }
