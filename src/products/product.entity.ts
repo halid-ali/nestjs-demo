@@ -11,6 +11,6 @@ export class Product {
     @Column('text')
     description: string;
 
-    @Column('int')
+    @Column('float')
     price: number;
 }
