@@ -8,11 +8,7 @@ export class ProductsController {
     @Get()
     @Header("content-type", "application/json")
     async getProducts() {
-        const products = await this.productsService.getProducts();
-        return {
-            'Product Count': products.length,
-            'Products': products
-        };
+        return await this.productsService.getProducts();
     }
 
     @Get(':id')
