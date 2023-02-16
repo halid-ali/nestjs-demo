@@ -20,8 +20,17 @@ export class UsersService {
         }));
     }
 
-    async getUser(id: number) {
+    async getUserById(id: number) {
         const user = await this.userRepository.findOneBy({ id });
+        return {
+            id: user.id,
+            name: user.name,
+            password: user.password,
+        };
+    }
+
+    async getUserByName(name: string) {
+        const user = await this.userRepository.findOneBy({ name });
         return {
             id: user.id,
             name: user.name,

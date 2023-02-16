@@ -12,8 +12,13 @@ export class UsersController {
     }
 
     @Get(':id')
-    async getProduct(@Param('id') id: number) {
-        return await this.usersService.getUser(id);
+    async getUserById(@Param('id') id: number) {
+        return await this.usersService.getUserById(id);
+    }
+
+    @Get(':name')
+    async getUserByName(@Param('name') name: string) {
+        return await this.usersService.getUserByName(name);
     }
 
     @Post()
