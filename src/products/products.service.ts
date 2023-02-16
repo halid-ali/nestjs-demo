@@ -1,22 +1,22 @@
-import { Injectable } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import { DataSource, QueryRunner, Repository } from "typeorm";
-import { Product } from "./product.entity";
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, QueryRunner, Repository } from 'typeorm';
+import { Product } from './product.entity';
 
 @Injectable()
 export class ProductsService {
     constructor(
         @InjectRepository(Product) private readonly productRepository: Repository<Product>,
-        private dataSource: DataSource
-    ) { }
+        private dataSource: DataSource,
+    ) {}
 
     async getProducts() {
         const products = await this.productRepository.find();
-        return products.map(product => ({
+        return products.map((product) => ({
             id: product.id,
             title: product.title,
             description: product.description,
-            price: product.price
+            price: product.price,
         }));
     }
 
@@ -26,8 +26,8 @@ export class ProductsService {
             id: product.id,
             title: product.title,
             description: product.description,
-            price: product.price
-        }
+            price: product.price,
+        };
     }
 
     async addProduct(title: string, description: string, price: number): Promise<any> {
@@ -35,7 +35,7 @@ export class ProductsService {
             const newProduct = this.productRepository.create({
                 title: title,
                 description: description,
-                price: price
+                price: price,
             });
             await x.manager.save(newProduct);
             return 'Product created with id: ' + newProduct.id.toString();
@@ -76,8 +76,7 @@ export class ProductsService {
         } catch (error) {
             await queryRunner.rollbackTransaction();
             return failureResult;
-        }
-        finally {
+        } finally {
             await queryRunner.release();
         }
     }
