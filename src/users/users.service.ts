@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BcryptPassword } from 'src/utils/bcrypt.password';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
@@ -23,6 +23,7 @@ export class UsersService {
 
     async getUserById(id: number) {
         const user = await this.userRepository.findOneBy({ id });
+        if (!user) throw new NotFoundException();
         return {
             id: user.id,
             name: user.name,
@@ -32,6 +33,7 @@ export class UsersService {
 
     async getUserByName(name: string) {
         const user = await this.userRepository.findOneBy({ name });
+        if (!user) throw new NotFoundException();
         return {
             id: user.id,
             name: user.name,
