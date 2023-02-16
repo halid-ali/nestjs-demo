@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BcryptPassword } from 'src/utils/bcrypt.password';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
 import { User } from './user.entity';
 
@@ -88,9 +89,6 @@ export class UsersService {
     }
 
     private encryptPassword(password: string) {
-        const bcrypt = require('bcrypt');
-        const saltRounds = 10;
-        const salt = bcrypt.genSaltSync(saltRounds);
-        return bcrypt.hashSync(password, salt);
+        return BcryptPassword.encryptPassword(password);
     }
 }
