@@ -1,13 +1,13 @@
 export class BcryptPassword {
     private static bcrypt = require('bcrypt');
     private static saltRounds = 10;
-    private static salt = this.bcrypt.genSaltSync(this.saltRounds);
+    private static salt = this.bcrypt.genSalt(this.saltRounds);
 
-    public static encryptPassword(password: string) {
-        return this.bcrypt.hashSync(password, this.salt);
+    public static async encryptPassword(password: string) {
+        return await this.bcrypt.hash(password, this.salt);
     }
 
-    public static checkPassword(userPassword: string, givenPassword: string) {
-        return this.bcrypt.compareSync(givenPassword, userPassword);
+    public static async checkPassword(userPassword: string, givenPassword: string) {
+        return await this.bcrypt.compare(givenPassword, userPassword);
     }
 }

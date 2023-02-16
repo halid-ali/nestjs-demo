@@ -9,7 +9,7 @@ export class AuthService {
 
     async validateUser(username: string, password: string): Promise<any> {
         const user = await this.usersService.getUserByName(username);
-        if (user && this.isPasswordMatch(user.password, password)) {
+        if (user && (await this.isPasswordMatch(user.password, password))) {
             const { password, ...result } = user;
             return result;
         }
@@ -18,11 +18,10 @@ export class AuthService {
 
     async login(user: any) {
         const payload = { username: user.name, sub: user.id };
-        console.log(payload);
         return { access_token: this.jwtService.sign(payload) };
     }
 
-    private isPasswordMatch(userPassword: string, givenPassword): boolean {
-        return BcryptPassword.checkPassword(userPassword, givenPassword);
+    private async isPasswordMatch(userPassword: string, givenPassword): Promise<boolean> {
+        return await BcryptPassword.checkPassword(userPassword, givenPassword);
     }
 }

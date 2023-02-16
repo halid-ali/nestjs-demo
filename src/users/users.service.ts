@@ -45,7 +45,7 @@ export class UsersService {
         return await this.executeTransaction(async (queryRunner: QueryRunner) => {
             const newUser = this.userRepository.create({
                 name: name,
-                password: this.encryptPassword(password),
+                password: await this.encryptPassword(password),
             });
             await queryRunner.manager.save(newUser);
             return 'User created with id: ' + newUser.id.toString();
@@ -58,7 +58,7 @@ export class UsersService {
             if (!userToUpdate) return 'User cannot be found';
 
             if (name) userToUpdate.name = name;
-            if (password) userToUpdate.password = this.encryptPassword(password);
+            if (password) userToUpdate.password = await this.encryptPassword(password);
 
             const result = await this.userRepository.update({ id }, userToUpdate);
             return result.affected ? 'User updated.' : 'User update failed.';
