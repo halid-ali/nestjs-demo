@@ -8,7 +8,6 @@ export class BcryptPassword {
     }
 
     public static checkPassword(userPassword: string, givenPassword: string) {
-        const hash = this.bcrypt.hashSync(givenPassword, this.salt);
-        return this.bcrypt.compareSync(userPassword, hash);
+        return this.bcrypt.compareSync(givenPassword, userPassword);
     }
 }
