@@ -18,7 +18,7 @@ export class AuthService {
 
     async login(user: any) {
         const payload = { username: user.name, sub: user.id };
-        return { access_token: this.jwtService.sign(payload) };
+        return { access_token: this.jwtService.sign(payload, { expiresIn: '2d' }) };
     }
 
     private async isPasswordMatch(userPassword: string, givenPassword): Promise<boolean> {
